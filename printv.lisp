@@ -24,8 +24,9 @@
     ;; Evaluated form:
     ((or cons (and symbol (not keyword)))
       (format *trace-output* "~&;;   ~w =>" form))
+    (vector (format *trace-output* "~&;;   ~s~%" form)) 
     ;; Self-evaluating form:
-    (t (format *trace-output* "~&;;  ~s~%" form)))
+    (t (format *trace-output* "~&;;   ~s~%" form)))
   (force-output *trace-output*))
 
 (defun printv-values-printer (values-list)
@@ -56,28 +57,38 @@
 (defmacro printv (&rest forms)
   (printv-expander forms))
 
-(defmacro :pv (&rest forms)
+(defmacro :printv (&rest forms)
   (printv-expander forms))
 
 
 #||
 
- (assert (eql 7
-             (printv :ff "example" :hr ""
-                     nil t (make-instance 'standard-object)  *package*
-                     (gethash 'x (make-hash-table)) (+ 3 4) :ff)))
+  (assert (equalp (list 7 5)
+          (multiple-value-list 
+            (printv :ff
+              "some simple examples" :hr ""
+              nil t  (list :s :p :o :c) #(1 2 3 4) :foo *package* (make-instance 'standard-object) 
+              "" "multiple value examples" :hr ""
+              (values) (gethash 'x (make-hash-table)) (values (+ 3 4) (+ 2 3)) :ff))))
 
-;;
 ;; ===============================================================================================
-;; example
+;; some simple examples
 ;; ------------------------------------------------------------
 ;; 
 ;;   NIL => NIL
 ;;   T => T
-;;   (MAKE-INSTANCE 'STANDARD-OBJECT) => #<STANDARD-OBJECT {10043C4A31}>
+;;   (LIST :S :P :O :C) => (:S :P :O :C)
+;;   #(1 2 3 4)
+;;   :FOO
 ;;   *PACKAGE* => #<PACKAGE "VIVACE-GRAPH-V2">
+;;   (MAKE-INSTANCE 'STANDARD-OBJECT) => #<STANDARD-OBJECT {100471CA71}>
+;; 
+;; multiple value examples
+;; ------------------------------------------------------------
+;; 
+;;   (VALUES) => [returned 0 values]
 ;;   (GETHASH 'X (MAKE-HASH-TABLE)) => NIL; NIL
-;;   (+ 3 4) => 7
+;;   (VALUES (+ 3 4) (+ 2 3)) => 7; 5
 ;;
 ;; ===============================================================================================
 
