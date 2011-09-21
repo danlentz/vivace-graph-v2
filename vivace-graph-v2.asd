@@ -15,7 +15,7 @@
                :babel
 	       :cffi
 	       :bordeaux-threads
-	       ;;:cl-btree-0.5
+	       :cl-btree-0.5
 	       :cl-skip-list
 	       :salza2
 	       :chipz
@@ -44,8 +44,9 @@
 	       (:file "data-types" :depends-on ("lock"))
 	       (:file "certainty-factors" :depends-on ("constants"))
 	       (:file "serialize" :depends-on ("data-types"))
-	       (:file "deserialize" :depends-on ("serialize"))
-	       (:file "index" :depends-on ("deserialize"))
+               (:file "deserialize" :depends-on ("serialize"))
+               (:file "table" :depends-on ("deserialize")) 
+	       (:file "index" :depends-on ("table"))
 	       (:file "transaction" :depends-on ("index"))
 	       (:file "full-text-index" :depends-on ("transaction"))
 	       (:file "store" :depends-on ("transaction" "full-text-index"))
