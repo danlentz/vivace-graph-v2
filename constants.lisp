@@ -57,3 +57,20 @@
 (defconstant +predicate+ 102)
 (defconstant +timestamp+ 103)
 (defconstant +rule+ 104)
+
+;; type identifiers for index persistence
+(defconstant +table+         110)
+(defconstant +uri+           111)
+(defconstant +pathname+      112)
+(defconstant +package+       113)
+
+;; type identifiers for rdfs semantics
+(defconstant +literal+       120)
+(defconstant +plain-literal+ 121)
+(defconstant +typed-literal+ 122)
+(defconstant +xml-literal+   123)
+(defconstant +seq+           124)
+(defconstant +bag+           125)
+(defconstant +alt+           126)
+(defconstant +nil+           127)
+
