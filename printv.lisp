@@ -4,10 +4,17 @@
 ;;; Copyright (C) 2006-2010, Dan Corkill <corkill@GBBopen.org>
 ;;; Licensed under Apache License 2.0 
 
-(in-package :vg)
+(in-package :vivace-graph-v2)
 
-(defun printv-separator ()
+(defun printv-minor-separator ()
   (format *trace-output* "~&;; ~60,,,'-<-~>~%")
+  (force-output *trace-output*))
+
+(defun printv-major-separator ()
+  (format *trace-output* "~&;;~%")
+  (princ
+    (concatenate 'string ";; "
+      (make-string (- *print-right-margin* 5) :initial-element #\=)) *trace-output*)
   (force-output *trace-output*))
 
 (defun printv-form-printer (form)
@@ -30,10 +37,9 @@
     `(let ((*print-readably* nil) ,result-sym)
        ,@(loop for form in forms nconcing
            (cond
-             ;; Separator requested?
-             ((eq form ':hr)
-               ;; list used for splicing protection...
-               (list '(printv-separator)))
+             ;; Markup form:
+             ((eq form ':ff) (list '(printv-major-separator)))
+             ((eq form ':hr) (list '(printv-minor-separator)))
              ;; Evaluated form:
              ((or (consp form) (and (symbolp form) (not (keywordp form))))
                `((printv-form-printer ',form)
@@ -53,3 +59,26 @@
 (defmacro :pv (&rest forms)
   (printv-expander forms))
 
+
+#||
+
+ (assert (eq nil
+             (printv :ff "example" :hr ""
+                     nil t (+ 3 4) *package*
+                     (gethash 'x (make-hash-table)) :ff)))
+
+
+;;
+;; ===============================================================================================
+;; example
+;; ------------------------------------------------------------
+;; 
+;;   NIL => NIL
+;;   T => T
+;;   (+ 3 4) => 7
+;;   *PACKAGE* => #<PACKAGE "VIVACE-GRAPH-V2">
+;;   (GETHASH 'X (MAKE-HASH-TABLE)) => NIL; NIL
+;;
+;; ===============================================================================================
+
+||#
