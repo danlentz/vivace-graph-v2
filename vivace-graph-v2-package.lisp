@@ -1,6 +1,7 @@
 (in-package #:cl-user)
 
 (defpackage #:vivace-graph-v2
+  (:nicknames :vg)
   (:use #:cl 
 	#:cffi 
 	#:bordeaux-threads 
@@ -165,3 +166,7 @@
 
 	   #:flatten
 	   ))
+
+(defpackage #:graph-words
+  (:nicknames :node)
+  (:use))
