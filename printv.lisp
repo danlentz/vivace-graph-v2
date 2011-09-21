@@ -62,11 +62,10 @@
 
 #||
 
- (assert (eq nil
+ (assert (eql 7
              (printv :ff "example" :hr ""
-                     nil t (+ 3 4) *package*
-                     (gethash 'x (make-hash-table)) :ff)))
-
+                     nil t (make-instance 'standard-object)  *package*
+                     (gethash 'x (make-hash-table)) (+ 3 4) :ff)))
 
 ;;
 ;; ===============================================================================================
@@ -75,9 +74,10 @@
 ;; 
 ;;   NIL => NIL
 ;;   T => T
-;;   (+ 3 4) => 7
+;;   (MAKE-INSTANCE 'STANDARD-OBJECT) => #<STANDARD-OBJECT {10043C4A31}>
 ;;   *PACKAGE* => #<PACKAGE "VIVACE-GRAPH-V2">
 ;;   (GETHASH 'X (MAKE-HASH-TABLE)) => NIL; NIL
+;;   (+ 3 4) => 7
 ;;
 ;; ===============================================================================================
 
