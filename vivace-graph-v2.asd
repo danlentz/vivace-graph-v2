@@ -30,6 +30,7 @@
 	       :cl-js
 	       :cl-json)
   :components ((:file "uuid")
+               (:file "printv")
 	       #+sbcl (:file "sb-impl")
 	       #+sbcl (:file "sb-thread")
 	       (:file "vivace-graph-v2-package" :depends-on ("uuid"))
