@@ -1,7 +1,22 @@
 (in-package #:vivace-graph-v2)
 
+(defgeneric triple-eql (t1 t2)
+  (:method ((t1 triple) (t2 triple)) 
+    (vg-uuid:uuid-eql (id t1) (id t2)))
+  (:method (t1 t2) nil))
+
 (defgeneric triple-equal (t1 t2)
-  (:method ((t1 triple) (t2 triple)) (uuid:uuid-eql (id t1) (id t2)))
+  (:method ((t1 triple) (t2 triple)) 
+    (and (vg-uuid:uuid-eql (id t1) (id t2))
+	 (equal (triple-subject t1)   (triple-subject t2))
+	 (equal (triple-predicate t1) (triple-predicate t2))
+	 (equal (triple-object t1)    (triple-object t2))))
+  (:method (t1 t2) nil))
+
+(defgeneric triple-equalp (t1 t2)
+  (:method ((t1 triple) (t2 triple)) 
+    (and (triple-equal t1 t2)
+	 (equal (triple-graph t1) (triple-graph t2))))
   (:method (t1 t2) nil))
 
 (defmethod deleted? ((triple triple))
@@ -20,7 +35,7 @@
   (if (not *read-uncommitted*)
       (with-graph-transaction (*store*)
 	(enqueue-lock triple (lock-triple triple :kind :read) :read)
-	(get-value))
+ 	(get-value))
       (get-value))))
 
 (defmethod subject ((list list))
@@ -29,7 +44,8 @@
 (defmethod predicate ((triple triple))
   (flet ((get-value ()
 	   (if (and (symbolp (triple-predicate triple)) 
-		    (eq *graph-words* (symbol-package (triple-predicate triple))))
+		    (eq *graph-words* 
+			(symbol-package (triple-predicate triple))))
 	       (symbol-name (triple-predicate triple))
 	       (triple-predicate triple))))
     (if (not *read-uncommitted*)
@@ -97,15 +113,24 @@
 	(triple-persistent? triple))
       (triple-persistent? triple)))
 
-(defun make-anonymous-node ()
-  "Create a unique anonymous node."
-  (format nil "_anon:~A" (make-uuid)))
-
+;; If the uuid library were more like Unicly it would do "the right thing" per
+;; the RFC by case-sensitively printing hex chars of UUID objects in lower
+;; case...  There is a minor performance optimization to be had by avoiding
+;; having to match [a-fA-F] and instead matching only [a-f]{4}
+;;
+;; (let ((regex (cl-ppcre:create-scanner "^_anon\:[0-9a-f]{8}(\-[0-9a-f]{4}){3}-[0-9a-f]{12}$")))
+;;   (cl-ppcre:scan regex (concatenate 'string "_anon:" (unicly::princ-to-string (unicly:make-v4-uuid)))))
+;; => 0, 42, #(24), #(29)
+;;
+;; (let ((regex (cl-ppcre:create-scanner "^_anon\:[0-9a-f]{8}(\-[0-9a-f]{4}){3}-[0-9a-f]{12}$")))
+;;   (cl-ppcre:scan regex (concatenate 'string "_anon:" (format nil "~S" (uuid:make-v4-uuid)))))
+;; => NIL
 (let ((regex 
-       "^_anon\:[0-9abcdefABCEDF]{8}\-[0-9abcdefABCEDF]{4}\-[0-9abcdefABCEDF]{4}\-[0-9abcdefABCEDF]{4}\-[0-9abcdefABCEDF]{12}$"))
+       ;; (cl-ppcre:create-scanner "^_anon\:[0-9a-f]{8}(\-[0-9a-f]{4}){3}-[0-9a-f]{12}$"))
+       "^_anon\:[0-9a-fA-F]{8}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{4}\-[0-9a-fA-F]{12}$"))
   (defun anonymous? (node)
-    (when (stringp node)
-      (cl-ppcre:scan regex node))))
+    (and (stringp node)
+	 (cl-ppcre:scan regex node))))
 
 (defun make-text-idx-key (g s p o)
   (string-downcase (format nil "~A~A~A~A~A~A~A" g #\Nul s #\Nul p #\Nul o)))
@@ -115,9 +140,6 @@
 	
 (defun unindex-predicate (name-string)
   (setf (gethash name-string (indexed-predicates *store*)) nil))
-
-(defmethod make-anonymous-node-name ((uuid uuid:uuid))
-  (format nil "_anon:~A" uuid))
 
 (defun set-triple-cf (triple new-value)
   (with-graph-transaction (*store*)
@@ -214,11 +236,14 @@
 
 (defun do-indexing (&optional (store *store*))
   (with-graph-transaction (store)
-    (loop for triple = (sb-concurrency:dequeue (index-queue store)) do
-	 (when (triple? triple)
-	   (index-triple triple *store*))
-	 (when (sb-concurrency:queue-empty-p (index-queue store))
-	   (return)))))
+    (loop 
+       ;; for triple = (sb-concurrency:dequeue (index-queue store))
+       for triple = (concurrent-dequeue (index-queue store))
+       do (when (triple? triple)
+            (index-triple triple *store*))
+       ;; (when (sb-concurrency:queue-empty-p (index-queue store))
+       (when (concurrent-queue-empty-p (index-queue store))
+         (return)))))
 
 (defun enqueue-triple-for-indexing (triple)
   (add-to-index-queue triple))
@@ -229,7 +254,7 @@
       (intern-spog subject predicate object graph)
     (flet ((lookup (s p o g)
 	     (let ((cursor (get-from-index (main-idx *store*) :gspoi-idx g s p o)))
-	       (if (uuid:uuid? (cursor-value cursor))
+	       (if (vg-uuid:uuid? (cursor-value cursor))
 		   (let ((triple (cursor-value
 				  (get-from-index (main-idx *store*) 
 						  :id-idx 
@@ -264,7 +289,7 @@
 	     (when (deleted? triple)
 	       (undelete-triple triple :persistent? persistent?))
 	     triple))
-	 (let ((id (uuid:make-v1-uuid)))  
+	 (let ((id (vg-uuid::make-v4-uuid)))  
 	   (let ((triple (make-triple :subject subject
 				      :predicate predicate
 				      :object object 
@@ -300,12 +325,13 @@
   (let ((triple-count 0))
     (with-locked-index ((main-idx store))
       (maphash #'(lambda (id triple)
+                   ;; (declare (ignorable id))
 		   (when (not (deleted? triple)) (incf triple-count)))
 	       (gethash :id-idx (index-table (main-idx store)))))
     triple-count))
 
 (defun get-triples (&key s p o (g *graph*) (store *store*))
-  "Returns a cursor to the results."
+
   (flet ((get-them ()
 	   (multiple-value-bind (s p o g) (intern-spog s p o g)
 	     (cond ((and g s p o)
@@ -363,23 +389,23 @@
 		(get-from-index (main-idx *store*) :gspoi-idx name))))
 
 (defun %set-triple-cf (id cf)
-  (let ((triple (get-triple-by-id (if (uuid:uuid? id) 
+  (let ((triple (get-triple-by-id (if (vg-uuid:uuid? id) 
 				      id 
-				      (uuid:make-uuid-from-string id)))))
+				      (vg-uuid::uuid-from-string id)))))
     (when (triple? triple)
       (cas (triple-cf triple) (triple-cf triple) cf))))
 
 (defun %undelete-triple (id)
-  (let ((triple (get-triple-by-id (if (uuid:uuid? id) 
+  (let ((triple (get-triple-by-id (if (vg-uuid:uuid? id) 
 				      id 
-				      (uuid:make-uuid-from-string id)))))
+				      (vg-uuid::uuid-from-string id)))))
     (when (triple? triple)
       (cas (triple-deleted? triple) (triple-deleted? triple) nil))))
 
 (defun %delete-triple (id timestamp)
-  (let ((triple (get-triple-by-id (if (uuid:uuid? id) 
+  (let ((triple (get-triple-by-id (if (vg-uuid:uuid? id) 
 				      id 
-				      (uuid:make-uuid-from-string id)))))
+				      (vg-uuid::uuid-from-string id)))))
     (when (triple? triple)
       (cas (triple-deleted? triple) (triple-deleted? triple) timestamp))))
 
@@ -444,22 +470,21 @@
 (defun load-triples (file)
   (with-open-file (stream file)
     (let ((count 0))
-      (handler-case
-	  (loop
-	     (let ((triple (read stream)))
-	       (%add-triple (nth 0 triple)
-			    (nth 1 triple)
-			    (nth 2 triple)
-			    (uuid:make-uuid-from-string (nth 3 triple))
-			    (nth 4 triple)
-			    (nth 5 triple)
-			    (nth 6 triple))
-	       (incf count)))
+      (handler-case (loop
+                       (let ((triple (read stream)))
+                         (%add-triple (nth 0 triple)
+                                      (nth 1 triple)
+                                      (nth 2 triple)
+                                      (vg-uuid::uuid-from-string (nth 3 triple))
+                                      (nth 4 triple)
+                                      (nth 5 triple)
+                                      (nth 6 triple))
+                         (incf count)))
 	(end-of-file (condition)
 	  (declare (ignore condition))
 	  (do-indexing)
 	  (format t "Loaded ~A triples~%" count))
 	(error (condition)
-	  (format t "Error loading triples: ~A / ~A~%" 
+	  (format t "Error loading triples: ~A / ~A~%"
 		  (type-of condition) condition))))))
 
