@@ -1,4 +1,4 @@
-;; (in-package #:cl-user)
+(in-package #:cl-user)
 
 ;; :NOTE I personally think the "NODE" nickname is a bad idea. 
 ;; Who knows what other packages use this nickname already. -- MON
@@ -18,13 +18,8 @@
 
 (defpackage #:vivace-graph-v2
   (:nicknames :vg)
-<<<<<<< HEAD
-  (:use #:cl 
-	#:cffi 
-=======
   (:use #:common-lisp
         #:cffi
->>>>>>> 0d3ebfc848fd5b836da7b17074878968d7d69e65
 	#:bordeaux-threads 
 	#:cl-skip-list
 	#:local-time)
@@ -189,10 +184,7 @@
 	   #:flatten
 	   ))
 
-<<<<<<< HEAD
-(defpackage #:graph-words
-  (:nicknames :node)
-  (:use))
-=======
 
->>>>>>> 0d3ebfc848fd5b836da7b17074878968d7d69e65
+
+
+

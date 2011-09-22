@@ -105,22 +105,6 @@ result is otherwise meaningless."
                                        (equalp (slot-value x slot-name) (slot-value y slot-name))))))
                        (mapcar #'sb-mop:slot-definition-name (sb-mop:class-slots x-class)))))))
 
-;; temporarily using assert for now until we get testing more organized
-
-(flet ((is (x y)
-         (assert (b-tree-impl::key= x y)))
-        (is-not (x y)
-          (assert (not (b-tree-impl::key= x y)))))
-  
-  (is     (make-instance 'standard-object) (make-instance 'standard-object))  
-  (is     (puri:uri "http://x.net")        (puri:uri "http://x.net"))
-  (is-not (puri:uri "http://x.net")        (puri:uri "http://y.net"))
-  (is     (find-class 'uuid:uuid)          (class-of (uuid:make-v4-uuid)))
-  (is-not (uuid:make-v4-uuid)              (uuid:make-v4-uuid))
-  (is     (uuid:make-null-uuid)            (uuid:make-null-uuid))
-  (is     (local-time:today)               (local-time:today))
-  (is-not (local-time:now)                 (local-time:today))) 
-    
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

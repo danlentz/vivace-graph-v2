@@ -37,14 +37,11 @@
 (defmethod asdf:perform ((op test-op)(sys (eql (find-system :vivace-graph-v2))))
   (declare (ignore op) (ignore sys))
   (format t "~%Journaling~%") 
-  (eval (read-from-string "(wal-tests::run-all-tests :wal-tests)"))
-  
+  (eval (read-from-string "(wal-tests::run-all-tests         :wal-tests)"))  
   (format t "~%Binary IO~%") 
   (eval (read-from-string "(binary-file-tests::run-all-tests :binary-file-tests)"))
-
   (format t "~%Block IO~%") 
-  (eval (read-from-string "(swap-file-tests::run-all-tests :swap-file-tests)"))
-
+  (eval (read-from-string "(swap-file-tests::run-all-tests   :swap-file-tests)"))
   (format t "~%BTree~%") 
   (eval (read-from-string "(b-tree-impl-tests::run-all-tests :b-tree-impl-tests)"))
   (eval (read-from-string "(b-tree-api-tests::run-all-tests  :b-tree-api-tests)")))
