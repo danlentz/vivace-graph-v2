@@ -70,29 +70,6 @@
 (defconstant +compressed-string+   #x0F) ;15
 
 ;; User-defined type identifiers for serializing. Start at 100
-<<<<<<< HEAD
-(defconstant +uuid+ 100)
-(defconstant +triple+ 101)
-(defconstant +predicate+ 102)
-(defconstant +timestamp+ 103)
-(defconstant +rule+ 104)
-
-;; type identifiers for index persistence
-(defconstant +table+         110)
-(defconstant +uri+           111)
-(defconstant +pathname+      112)
-(defconstant +package+       113)
-
-;; type identifiers for rdfs semantics
-(defconstant +literal+       120)
-(defconstant +plain-literal+ 121)
-(defconstant +typed-literal+ 122)
-(defconstant +xml-literal+   123)
-(defconstant +seq+           124)
-(defconstant +bag+           125)
-(defconstant +alt+           126)
-(defconstant +nil+           127)
-=======
 (defconstant +uuid+                #x64) ;100
 (defconstant +triple+              #x65) ;101
 (defconstant +predicate+           #x66) ;102
@@ -116,5 +93,5 @@
 (defconstant +bag+                #x7D) ;125
 (defconstant +alt+                #x7E) ;126
 (defconstant +nil+                #x7F) ;127
->>>>>>> 0d3ebfc848fd5b836da7b17074878968d7d69e65
+
 

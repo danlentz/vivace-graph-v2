@@ -27,61 +27,7 @@
 (defun ip-to-string (ip)
   (format nil "~A.~A.~A.~A" (aref ip 0) (aref ip 1) (aref ip 2) (aref ip 3)))
 
-<<<<<<< HEAD
-;; (defgeneric less-than (x y)
-;;   (:documentation "Generic less-than operator.  Allows comparison of apples and oranges.")
-;;   (:method ((x symbol)    (y symbol))    (string< (symbol-name x) (symbol-name y)))
-;;   (:method ((x symbol)    (y string))    (string< (symbol-name x) y))
-;;   (:method ((x symbol)    (y number))    (string< (symbol-name x) (write-to-string y)))
-;;   (:method ((x symbol)    (y uuid:uuid)) (string< (symbol-name x) 
-;; 						  (uuid:print-bytes nil y)))
-;;   (:method ((x number)    (y number))    (< x y))
-;;   (:method ((x number)    (y symbol))    (string< (write-to-string x) (symbol-name y)))
-;;   (:method ((x number)    (y string))    (string< (write-to-string x) y))
-;;   (:method ((x number)    (y uuid:uuid)) (string< (write-to-string x) 
-;; 						  (uuid:print-bytes nil y)))
-;;   (:method ((x string)    (y string))    (string< x y))
-;;   (:method ((x string)    (y symbol))    (string< x (symbol-name y)))
-;;   (:method ((x string)    (y number))    (string< x (write-to-string y)))
-;;   (:method ((x string)    (y uuid:uuid)) (string< x (uuid:print-bytes nil y)))
-;;   (:method ((x timestamp) (y timestamp)) (timestamp< x y))
-;;   (:method ((x number)    (y timestamp)) (< (timestamp-to-universal x) y))
-;;   (:method ((x timestamp) (y number))    (< x (timestamp-to-universal y)))
-;;   (:method ((x uuid:uuid) (y uuid:uuid))
-;;     (string< (uuid:print-bytes nil x) (uuid:print-bytes nil y)))
-;;   (:method ((x uuid:uuid) (y string)) (string< (uuid:print-bytes nil x) y))
-;;   (:method ((x uuid:uuid) (y symbol)) (string< (uuid:print-bytes nil x) 
-;; 					       (symbol-name y)))
-;;   (:method ((x uuid:uuid) (y number)) (string< (uuid:print-bytes nil x) 
-;; 					       (write-to-string y))))
 
-;; (defgeneric greater-than (x y)
-;;   (:documentation "Generic greater-than operator.  Allows comparison of apples and oranges.")
-;;   (:method ((x symbol) (y symbol))    (string> (symbol-name x) (symbol-name y)))
-;;   (:method ((x symbol) (y string))    (string> (symbol-name x) y))
-;;   (:method ((x symbol) (y number))    (string> (symbol-name x) (write-to-string y)))
-;;   (:method ((x symbol) (y uuid:uuid)) (string> (symbol-name x) 
-;; 					       (uuid:print-bytes nil y)))
-;;   (:method ((x number) (y number))    (> x y))
-;;   (:method ((x number) (y symbol))    (string> (write-to-string x) (symbol-name y)))
-;;   (:method ((x number) (y string))    (string> (write-to-string x) y))
-;;   (:method ((x number) (y uuid:uuid)) (string> (write-to-string x) 
-;; 					       (uuid:print-bytes nil y)))
-;;   (:method ((x string) (y string))    (string> x y))
-;;   (:method ((x string) (y symbol))    (string> x (symbol-name y)))
-;;   (:method ((x string) (y number))    (string> x (write-to-string y)))
-;;   (:method ((x string) (y uuid:uuid)) (string> x (uuid:print-bytes nil y)))
-;;   (:method ((x timestamp) (y timestamp)) (timestamp> x y))
-;;   (:method ((x number)    (y timestamp)) (> (timestamp-to-universal x) y))
-;;   (:method ((x timestamp) (y number))    (> x (timestamp-to-universal y)))
-;;   (:method ((x uuid:uuid) (y uuid:uuid)) 
-;;     (string> (uuid:print-bytes nil x) (uuid:print-bytes nil y)))
-;;   (:method ((x uuid:uuid) (y string)) (string> (uuid:print-bytes nil x) y))
-;;   (:method ((x uuid:uuid) (y symbol)) (string> (uuid:print-bytes nil x) 
-;; 					       (symbol-name y)))
-;;   (:method ((x uuid:uuid) (y number)) (string> (uuid:print-bytes nil x) 
-;; 					       (write-to-string y))))
-=======
 (defgeneric less-than (x y)
   (:documentation "Generic less-than operator.  Allows comparison of apples and oranges.")
   (:method ((x symbol)    (y symbol))    (string< (symbol-name x) (symbol-name y)))
@@ -164,7 +110,7 @@
 					       (symbol-name y)))
   (:method ((x uuid:uuid) (y number)) (string> (uuid:print-bytes nil x) 
 					       (write-to-string y))))
->>>>>>> 0d3ebfc848fd5b836da7b17074878968d7d69e65
+
 
 (defun uri? (string)
   (cl-ppcre:scan "^(https?|ftp)\:\/\/[a-zA-Z0-9\-\.]+\.[a-zA-Z]{2,3}(\/.*)?$" string))
@@ -424,50 +370,6 @@ scope of the corresponding clause."
 (defmacro fun (&body body)
   `(lambda (&optional _) (declare (ignorable _)) ,@body))
 
-;; ;;; this variant is from sheeple, which in-turn, was adapted from Alexandria
-;; (defmacro with-gensyms (names &body forms)
-;;   "Binds each variable named by a symbol in NAMES to a unique symbol around
-;; FORMS. Each of NAMES must either be either a symbol, or of the form:
-
-;;  (symbol string-designator)
-
-;; Bare symbols appearing in NAMES are equivalent to:
-
-;;  (symbol symbol)
-
-;; The string-designator is used as the argument to GENSYM when constructing the
-;; unique symbol the named variable will be bound to."
-;;   `(let ,(mapcar (fun (multiple-value-bind (symbol string)
-;;                           (etypecase _
-;;                             (symbol
-;;                              (values _ (symbol-name _)))
-;;                             ((cons symbol (cons string-designator null))
-;;                              (values (car _) (string (cadr _)))))
-;;                         `(,symbol (gensym ,string))))
-;;                  names)
-;;      ,@forms))
-
-;; ;;; this variant is from sheeple, which in-turn, was heavily adapted from Alexandria
-;; (defmacro once-only (specs &body forms)
-;;   "Each SPEC must be either a NAME, or a (NAME INITFORM), with plain
-;; NAME using the named variable as initform.
-
-;; Evaluates FORMS with names rebound to temporary variables, ensuring
-;; that each is evaluated only once.
-
-;; Example:
-;;   (defmacro cons1 (x) (once-only (x) `(cons ,x ,x)))
-;;   (let ((y 0)) (cons1 (incf y))) => (1 . 1)"
-;;   (let ((gensyms (mapcar (fun (gensym "ONCE-ONLY")) specs))
-;;         (real-specs (mapcar (fun (etypecase _
-;;                                    (list (cons (car _) (cadr _)))
-;;                                    (symbol (cons _ _))))
-;;                             specs)))
-;;     (flet ((mapcar-gars (thunction) (mapcar thunction gensyms real-specs)))
-;;       `(let ,(mapcar-gars (lambda (g n) `(,g (gensym ,(string (car n))))))
-;;          `(let (,,@(mapcar-gars (lambda (g n) ``(,,g ,,(cdr n)))))
-;;             ,(let ,(mapcar-gars (lambda (g n) `(,(car n) ,g)))
-;;                   ,@forms))))))
 
 (declaim (inline delete/swapped-arguments))
 (defun delete/swapped-arguments (sequence item &rest keyword-arguments)

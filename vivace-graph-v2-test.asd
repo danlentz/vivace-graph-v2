@@ -12,17 +12,14 @@
   :description "Vivace Graph Version 2 Test Suite"
   :long-description "Vivace Graph Version 2 Test Suite."
   :depends-on (:vivace-graph-v2
-	       :cl-fad
-	       :fiveam)
+                :hu.dwim.stefil
+                :cl-fad
+                :fiveam)
   :components ((:file "vivace-graph-v2-test-package")
-<<<<<<< HEAD
-               (:file "test-aux" :depends-on ("vivace-graph-v2-test-package"))
-	       (:file "test-scenarios" :depends-on ("vivace-graph-v2-test-package"))
-=======
-               (:file "test-aux"             :depends-on ("vivace-graph-v2-test-package"))
-	       (:file "test-scenarios"       :depends-on ("vivace-graph-v2-test-package"))
->>>>>>> 0d3ebfc848fd5b836da7b17074878968d7d69e65
-	       (:file "vivace-graph-v2-test" :depends-on ("test-scenarios"))))
+                (:file "test-aux"             :depends-on ("vivace-graph-v2-test-package"))
+                (:file "btree-test"           :depends-on ("test-aux"))
+                (:file "test-scenarios"       :depends-on ("vivace-graph-v2-test-package"))
+                (:file "vivace-graph-v2-test" :depends-on ("test-scenarios"))))
 
 
 
@@ -35,13 +32,17 @@
 (defmethod asdf:perform ((op test-op)(sys (eql (find-system :vivace-graph-v2))))
   (declare (ignore op) (ignore sys))
   (format t "~%Journaling~%") 
-  (funcall (read-from-string "wal-test::run-all-tests"))
+  (eval (read-from-string "(wal-tests::run-all-tests :wal-tests)"))
+  
   (format t "~%Binary IO~%") 
-  (funcall (read-from-string "binary-file::run-all-tests"))
+  (eval (read-from-string "(binary-file-tests::run-all-tests :binary-file-tests)"))
+
   (format t "~%Block IO~%") 
-  (funcall (read-from-string "swap-file-test::run-all-tests"))
+  (eval (read-from-string "(swap-file-tests::run-all-tests :swap-file-tests)"))
+
   (format t "~%BTree~%") 
-  (funcall (read-from-string "b-tree-test-impl::run-all-tests")))
+  (eval (read-from-string "(b-tree-impl-tests::run-all-tests :b-tree-impl-tests)"))
+  (eval (read-from-string "(b-tree-api-tests::run-all-tests :b-tree-api-tests)")))
 
 (defmethod asdf:perform :after ((op test-op)(sys (eql (find-system :vivace-graph-v2))))
   (declare (ignore op) (ignore sys))

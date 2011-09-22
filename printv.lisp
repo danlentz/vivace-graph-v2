@@ -1,8 +1,3 @@
-<<<<<<< HEAD
-;;;; -*- Mode:Lisp; Syntax:common-lisp; coding: utf-8-unix;
-
-=======
->>>>>>> 0d3ebfc848fd5b836da7b17074878968d7d69e65
 ;;; Adapted from the Handy PRINTV Macro Written by Dan Corkill
 ;;; Copyright (C) 2006-2010, Dan Corkill <corkill@GBBopen.org>
 ;;; Licensed under Apache License 2.0 
@@ -96,7 +91,4 @@
 ;; ===============================================================================================
 
 ||#
-<<<<<<< HEAD
-=======
 
->>>>>>> 0d3ebfc848fd5b836da7b17074878968d7d69e65

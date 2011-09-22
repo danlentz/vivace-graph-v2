@@ -1,13 +1,6 @@
 (in-package #:vivace-graph-v2)
 
-<<<<<<< HEAD
-(defparameter *graph-words* (find-package :graph-words))
-=======
 (defparameter *graph-words* (find-package "GRAPH-WORDS"))
-
-(defparameter *literals*    (make-hash-table :synchronized t :test 'equalp))
-(defparameter *nodes*       (make-hash-table :synchronized t :test 'equalp))
->>>>>>> 0d3ebfc848fd5b836da7b17074878968d7d69e65
 
 (defparameter *literals*    (make-hash-table :synchronized t :test 'equalp))
 (defparameter *nodes*       (make-hash-table :synchronized t :test 'equalp))
@@ -15,32 +8,18 @@
 (defparameter *store* nil)
 (defparameter *store-table* (make-hash-table :synchronized t :test 'eql))
 
-<<<<<<< HEAD
-(defvar *default-context*   (uuid:make-null-uuid))
-
-(defvar *default-location-defaults* (ensure-directories-exist
-                                      (asdf:system-relative-pathname
-                                        (asdf:find-system :vivace-graph-v2)
-                                        "data/" :type "db")))
-=======
 
 ;; IMHO the null-uuid is basically a thing that exists b/c it has to otherwise
 ;; the UUID model falls over and unless there is a specific reason for using the
 ;; null-uuid we shouldn'? -- MON
 ;;
 ;; :WAS (defvar *default-context*   (unicly:make-null-uuid))
-(defvar *default-vivace-graph-context* (unicly:make-v5-uuid unicly:*uuid-namespace-dns* "*default-context*"))
+(defvar *default-vivace-graph-context*
+  (unicly:make-v5-uuid unicly:*uuid-namespace-dns* "*default-context*"))
 
-;; :FIXME Relying on asdf:<FOO> here is potentially a point of failure should
-;; this variable ever change location. 
-;; Also, in general, creating pathnames in someone elses tree is rude. 
-;; Also, this is a bad idea w/r/t any potential Quicklisp dist b/c it will leave
-;; a data/db somewhere underneath software/vivace-graph-v2 -- MON
 (defvar *default-location-defaults* (ensure-directories-exist
-                                     (asdf:system-relative-pathname
-                                      (asdf:find-system :vivace-graph-v2)
-                                      "data/" :type "db")))
->>>>>>> 0d3ebfc848fd5b836da7b17074878968d7d69e65
+                                      (merge-pathnames "data/"
+                                        (user-homedir-pathname))))
 
 (defvar *constituent* nil
   "dynamic indication of current node's statement constituent type")
@@ -76,6 +55,11 @@
 ;;      finally (setf (gethash :warn    *syslog-priorities*)
 ;;                    (gethash :warning *syslog-priorities*))))
 ;;
+
+;; I would prefer it as the existing implementation does not seem to work on my
+;; system (darwin x8664) -- although i havent spent any time looking into why so
+;; perhaps there is some trivial reason to explain this. -- dan
+
 (defvar *syslog-program* "vivace-graph-v2")
 (defvar *syslog-facility* sb-posix:log-local7)
 (progn
