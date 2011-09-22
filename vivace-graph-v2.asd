@@ -58,6 +58,6 @@
                 (:file "prologc"            :depends-on ("triples"))
                 (:file "prolog-functors"    :depends-on ("prologc"))
                 (:file "templates"          :depends-on ("prolog-functors"))
-                (:file "vivace-graph-v2-doc-utils" :depends-on ("vivace-graph-v2-package"))
+                (:file "vivace-graph-v2-doc-utils" :depends-on ("triples"))
                 (:file "vivace-graph-v2-docs"      :depends-on ("vivace-graph-v2-doc-utils"))))
 
