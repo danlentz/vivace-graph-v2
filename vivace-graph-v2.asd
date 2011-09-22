@@ -25,6 +25,7 @@
                 :salza2
                 :chipz
                 :uuid
+                :unicly
                 :ieee-floats
                 :local-time
                 :date-calc
