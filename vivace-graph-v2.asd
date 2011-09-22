@@ -17,23 +17,19 @@
                 :babel  
                 :cl-btree-0.5
                 :hu.dwim.serializer
+                :hu.dwim.def
                 :cffi
                 :bordeaux-threads
                 :puri
                 :cl-skip-list
                 :salza2
                 :chipz
-                ;; :hunchentoot    ;; not currently in use AFAICT
                 :uuid
                 :ieee-floats
                 :local-time
                 :date-calc
                 :parse-number
-                :split-sequence
-                ;; :py-configparser ;; not currently in use AFAICT
-                ;; :cl-js           ;; not currently in use AFAICT
-                ;; :cl-json         ;; not currently in use AFAICT 
-                )
+                :split-sequence)
   :components ((:file "vivace-graph-v2-package")
                 (:file "uuid-bridge"        :depends-on ("vivace-graph-v2-package"))
                 (:file "gettimeofday"       :depends-on ("vivace-graph-v2-package"))
