@@ -2,10 +2,6 @@
 ;;; :FILE vivace-graph-v2-FORK/concurrency-bridge.lisp
 ;;; ==============================
 
-<<<<<<< HEAD
-(in-package #:vivace-graph-v2)
-
-=======
 ;; :NOTE Following are symbols exported from LispWorks MP package:
 ;;  `allowing-block-interrupts', `barrier-arriver-count', `barrier-change-count',
 ;;  `barrier-count', `barrier-disable', `barrier-enable', `barrier-name',
@@ -102,32 +98,10 @@
 ;;; ==============================
 
 #+sbcl
->>>>>>> 0d3ebfc848fd5b836da7b17074878968d7d69e65
 (defun concurrent-make-mailbox (&key name initial-contents)
   (sb-concurrency:make-mailbox :name name 
                                :initial-contents initial-contents))
 
-<<<<<<< HEAD
-(defun concurrent-send-message (mailbox message)
-  (sb-concurrency:send-message mailbox message))
-
-(defun concurrent-receive-message (mailbox &key)
-  (sb-concurrency:receive-message mailbox))
-
-(defun concurrent-receive-pending-message (mailbox &optional n)
-  (sb-concurrency:receive-pending-messages mailbox n))
-
-(defun concurrent-make-queue (&key name initial-contents)        
-  (sb-concurrency:make-queue :name name                          
-                             :initial-contents initial-contents))
-
-(defun concurrent-enqueue (value queue)
-  (sb-concurrency:enqueue value queue))
-
-(defun concurrent-dequeue (queue)
-  (sb-concurrency:dequeue queue))
-
-=======
 #+sbcl
 (defun concurrent-send-message (mailbox message)
   (sb-concurrency:send-message mailbox message))
@@ -155,7 +129,7 @@
 #+sbcl
 (defun concurrent-queue-empty-p (queue)
   (sb-concurrency:queue-empty-p queue))
->>>>>>> 0d3ebfc848fd5b836da7b17074878968d7d69e65
+
 
 ;;; ==============================
 ;;; EOF

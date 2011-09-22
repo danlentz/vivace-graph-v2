@@ -77,6 +77,9 @@
 ;; triple-equalp    -- if two triples are triple-equal and there respective graphs are cl:equal
 ;; make-fresh-store --> (make-skip-list :key-equal 'equalp :value-equal 'vg-uuid:uuid-eql :duplicates-allowed? t)
 ;; we should prob. subclass unicly:unique-universal-identifier before using these.
+
+;; NOTYET
+#+nil
 (defgeneric uuid-eql (uuid1 uuid2)
   (:method ((uuid1 vg-uuid) (uuid2 vg-uuid))
     (unicly:uuid-eql uuid1 uuid1))
