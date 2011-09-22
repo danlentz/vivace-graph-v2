@@ -1,6 +1,8 @@
 ;; ASDF package description for vivace-graph-v2-test     -*- Lisp -*-
 
-(defpackage #:vivace-graph-v2-test-system (:use #:common-llisp #:asdf))
+(in-package :cl-user)
+
+(defpackage #:vivace-graph-v2-test-system (:use #:common-lisp #:asdf))
 
 (in-package #:vivace-graph-v2-test-system)
 
@@ -12,7 +14,10 @@
   :description "Vivace Graph Version 2 Test Suite"
   :long-description "Vivace Graph Version 2 Test Suite."
   :depends-on (:vivace-graph-v2
+                :hu.dwim.def
                 :hu.dwim.stefil
+                :hu.dwim.defclass-star
+                :hu.dwim.serializer
                 :cl-fad
                 :fiveam)
   :components ((:file "vivace-graph-v2-test-package")
@@ -42,7 +47,7 @@
 
   (format t "~%BTree~%") 
   (eval (read-from-string "(b-tree-impl-tests::run-all-tests :b-tree-impl-tests)"))
-  (eval (read-from-string "(b-tree-api-tests::run-all-tests :b-tree-api-tests)")))
+  (eval (read-from-string "(b-tree-api-tests::run-all-tests  :b-tree-api-tests)")))
 
 (defmethod asdf:perform :after ((op test-op)(sys (eql (find-system :vivace-graph-v2))))
   (declare (ignore op) (ignore sys))
