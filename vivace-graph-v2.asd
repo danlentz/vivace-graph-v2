@@ -19,15 +19,16 @@
 	       :cl-skip-list
 	       :salza2
 	       :chipz
-	       :hunchentoot
-	       :uuid
+	       ;; :hunchentoot
+               :uuid
+               :puri
 	       :ieee-floats
 	       :local-time
 	       :date-calc
 	       :parse-number
 	       :split-sequence
-	       :py-configparser
-	       :cl-js
+	       ;; :py-configparser
+	       ;; :cl-js
 	       :cl-json)
   :components ((:file "uuid")
 	       #+sbcl (:file "sb-impl")
