@@ -113,6 +113,9 @@
 	(triple-persistent? triple))
       (triple-persistent? triple)))
 
+(defun make-anonymous-node ()
+  (format nil "_anon:~A" (unicly:make-v4-uuid)))
+
 ;; If the uuid library were more like Unicly it would do "the right thing" per
 ;; the RFC by case-sensitively printing hex chars of UUID objects in lower
 ;; case...  There is a minor performance optimization to be had by avoiding
