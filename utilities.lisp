@@ -1,15 +1,33 @@
 (in-package #:vivace-graph-v2)
 
+(defun symbol-nstring-upcase (symbol-to-upcase)
+  (declare (symbol symbol-to-upcase))
+  #-:sbcl (assert (symbolp "string"))
+  (nstring-upcase (string symbol-to-upcase)))
+
+(defun ensure-internable (thing)
+  (etypecase thing
+    (symbol 
+     (intern (symbol-nstring-upcase thing)))
+    (string 
+     (intern (string-upcase thing)))
+    (number thing)
+    (t 
+     (error "THING must be of type cl:string, cl:symbol or cl:integer, not ~A" 
+            (type-of thing)))))
+
 #+sbcl
 (defun quit () (sb-ext:quit))
 
 (defmacro logger (level msg &rest args)
   "Syslogger"
+  ;; `(osicat-posix:syslog (gethash ',level *syslog-priorities*) ,msg ,@args))
   `(funcall #'sb-posix:syslog (gethash ',level *syslog-priorities*) ,msg ,@args))
 
 (defun ip-to-string (ip)
   (format nil "~A.~A.~A.~A" (aref ip 0) (aref ip 1) (aref ip 2) (aref ip 3)))
 
+<<<<<<< HEAD
 ;; (defgeneric less-than (x y)
 ;;   (:documentation "Generic less-than operator.  Allows comparison of apples and oranges.")
 ;;   (:method ((x symbol)    (y symbol))    (string< (symbol-name x) (symbol-name y)))
@@ -63,16 +81,96 @@
 ;; 					       (symbol-name y)))
 ;;   (:method ((x uuid:uuid) (y number)) (string> (uuid:print-bytes nil x) 
 ;; 					       (write-to-string y))))
+=======
+(defgeneric less-than (x y)
+  (:documentation "Generic less-than operator.  Allows comparison of apples and oranges.")
+  (:method ((x symbol)    (y symbol))    (string< (symbol-name x) (symbol-name y)))
+  (:method ((x symbol)    (y string))    (string< (symbol-name x) y))
+  (:method ((x symbol)    (y number))    (string< (symbol-name x) (write-to-string y)))
+
+  (:method ((x symbol)    (y uuid:uuid)) (string< (symbol-name x) 
+						  (uuid:print-bytes nil y)))
+
+  ;; (:method ((x symbol)    (y vg-uuid:vg-uuid)) (string< (symbol-name x) 
+  ;;                                                       (unicly:uuid-princ-to-string y)))
+
+  (:method ((x number)    (y number))    (< x y))
+  (:method ((x number)    (y symbol))    (string< (write-to-string x) (symbol-name y)))
+  (:method ((x number)    (y string))    (string< (write-to-string x) y))
+
+  (:method ((x number)    (y uuid:uuid)) (string< (write-to-string x) 
+						  (uuid:print-bytes nil y)))
+
+  ;; (:method ((x number)    (y vg-uuid:vg-uuid)) (<  x 
+  ;;                                                  (unicly::uuid-bit-vector-to-integer
+  ;;                                                   (unicly:uuid-to-bit-vector y))))
+
+  (:method ((x string)    (y string))    (string< x y))
+  (:method ((x string)    (y symbol))    (string< x (symbol-name y)))
+  (:method ((x string)    (y number))    (string< x (write-to-string y)))
+  (:method ((x string)    (y uuid:uuid)) (string< x (uuid:print-bytes nil y)))
+
+  ;;  (:method ((x string)    (y vg-uuid:vg-uuid)) (string< x (unicly:uuid-princ-to-string y)))
+
+  (:method ((x timestamp) (y timestamp)) (timestamp< x y))
+  (:method ((x number)    (y timestamp)) (< (timestamp-to-universal x) y))
+  (:method ((x timestamp) (y number))    (< x (timestamp-to-universal y)))
+
+  (:method ((x uuid:uuid) (y uuid:uuid)) (string< (uuid:print-bytes nil x) (uuid:print-bytes nil y)))
+
+  ;; (:method ((x vg-uuid:vg-uuid) (y vg-uuid:vg-uuid)) (string< (unicly:uuid-princ-to-string x) 
+  ;;                                                             (unicly:uuid-princ-to-string y)))
+
+  (:method ((x uuid:uuid) (y string)) (string< (uuid:print-bytes nil x) y))
+
+  ;; (:method ((x vg-uuid:vg-uuid) (y string)) (string< (unicly:uuid-princ-to-string x) y))
+
+  (:method ((x uuid:uuid) (y symbol)) (string< (uuid:print-bytes nil x) 
+					       (symbol-name y)))
+
+  ;; (:method ((x vg-uuid:vg-uuid) (y symbol)) (string< (unicly:uuid-princ-to-string nil x) 
+  ;;       				       (symbol-name y)))
+
+  (:method ((x uuid:uuid) (y number)) (string< (uuid:print-bytes nil x) 
+					       (write-to-string y)))
+  
+  ;; (:method ((x vg-uuid:vg-uuid) (y number)) (< (unicly::uuid-bit-vector-to-integer (unicly:uuid-to-bit-vector x))
+  ;;       				                y))
+  )
+
+(defgeneric greater-than (x y)
+  (:documentation "Generic greater-than operator.  Allows comparison of apples and oranges.")
+  (:method ((x symbol) (y symbol))    (string> (symbol-name x) (symbol-name y)))
+  (:method ((x symbol) (y string))    (string> (symbol-name x) y))
+  (:method ((x symbol) (y number))    (string> (symbol-name x) (write-to-string y)))
+  (:method ((x symbol) (y uuid:uuid)) (string> (symbol-name x) 
+					       (uuid:print-bytes nil y)))
+  (:method ((x number) (y number))    (> x y))
+  (:method ((x number) (y symbol))    (string> (write-to-string x) (symbol-name y)))
+  (:method ((x number) (y string))    (string> (write-to-string x) y))
+  (:method ((x number) (y uuid:uuid)) (string> (write-to-string x) 
+					       (uuid:print-bytes nil y)))
+  (:method ((x string) (y string))    (string> x y))
+  (:method ((x string) (y symbol))    (string> x (symbol-name y)))
+  (:method ((x string) (y number))    (string> x (write-to-string y)))
+  (:method ((x string) (y uuid:uuid)) (string> x (uuid:print-bytes nil y)))
+  (:method ((x timestamp) (y timestamp)) (timestamp> x y))
+  (:method ((x number)    (y timestamp)) (> (timestamp-to-universal x) y))
+  (:method ((x timestamp) (y number))    (> x (timestamp-to-universal y)))
+  (:method ((x uuid:uuid) (y uuid:uuid)) 
+    (string> (uuid:print-bytes nil x) (uuid:print-bytes nil y)))
+  (:method ((x uuid:uuid) (y string)) (string> (uuid:print-bytes nil x) y))
+  (:method ((x uuid:uuid) (y symbol)) (string> (uuid:print-bytes nil x) 
+					       (symbol-name y)))
+  (:method ((x uuid:uuid) (y number)) (string> (uuid:print-bytes nil x) 
+					       (write-to-string y))))
+>>>>>>> 0d3ebfc848fd5b836da7b17074878968d7d69e65
 
 (defun uri? (string)
   (cl-ppcre:scan "^(https?|ftp)\:\/\/[a-zA-Z0-9\-\.]+\.[a-zA-Z]{2,3}(\/.*)?$" string))
 
 (defun make-slot-key (id slot)
   (format nil "~A~A~A" id #\Nul slot))
-
-;; Make compare-and-swap shorter to call
-(defmacro cas (place old new)
-  `(sb-ext:compare-and-swap ,place ,old ,new))
 
 ;; String split without regexes.
 (defun split (string &optional (ws '(#\Space #\Tab)) max)

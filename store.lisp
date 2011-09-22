@@ -31,7 +31,9 @@
 
 (defun list-indexed-predicates (&optional (store *store*))
   (let ((result nil))
-    (maphash #'(lambda (k v) (when v (push k result))) (indexed-predicates store))
+    (maphash #'(lambda (k v) 
+		 (when v (push k result))) 
+	     (indexed-predicates store))
     (sort result #'string>)))
 
 (defun make-fresh-store (name location &key (num-locks 10000))
@@ -43,22 +45,26 @@
 			:lock-pool (make-lock-pool num-locks)
 			:locks (make-hash-table :synchronized t :test 'equal)
 			:text-idx (make-skip-list :key-equal 'equalp
-						  :value-equal 'uuid:uuid-eql
+						  :value-equal 'vg-uuid:uuid-eql
 						  :duplicates-allowed? t)
-			:log-mailbox (sb-concurrency:make-mailbox)
-			:index-queue (sb-concurrency:make-queue)
-			:delete-queue (sb-concurrency:make-queue)
+			;; :log-mailbox  (sb-concurrency:make-mailbox)
+			;; :index-queue  (sb-concurrency:make-queue)
+			;; :delete-queue (sb-concurrency:make-queue)
+			:log-mailbox  (concurrent-make-mailbox)
+			:index-queue  (concurrent-make-queue)
+			:delete-queue (concurrent-make-queue)
 			:templates (make-hash-table :synchronized t :test 'eql)
 			:indexed-predicates (make-hash-table :synchronized t 
 							     :test 'eql))))
-    (add-to-index (main-idx store) (make-uuid-table :synchronized t) :id-idx)
+    (add-to-index (main-idx store) (vg-uuid::make-uuid-table :synchronized t) :id-idx)
     (setf (logger-thread store) (start-logger store))
     store))
 
 (defun make-local-triple-store (name location)
   (make-fresh-store name location))
 
-(defun create-triple-store (&key name if-exists? location host port user password)
+(defun create-triple-store (&key name if-exists? location host port 
+			    user password)
   (declare (ignore if-exists?))
   (setq *graph* (or name location (format nil "~A:~A" host port)))
   (if location
@@ -99,18 +105,21 @@
     (setq *store* store)))
 
 (defun clear-triple-store (&optional (store *store*))
-  (sb-concurrency:send-message (log-mailbox store) :shutdown-and-clear)
-  (join-thread (logger-thread store))
+  ;; (sb-concurrency:send-message (log-mailbox store) :shutdown-and-clear)
+  (concurrent-send-message (log-mailbox store) :shutdown-and-clear)
+  (bt:join-thread (logger-thread store))
   (make-fresh-store *graph* (location store)))
   
 (defun use-graph (name)
   (setq *graph* name))
 
 (defun add-to-index-queue (thing &optional (store *store*))
-  (sb-concurrency:enqueue thing (index-queue store)))
+  ;; (sb-concurrency:enqueue thing (index-queue store))
+  (concurrent-enqueue thing (index-queue store)))
 
 (defun add-to-delete-queue (thing &optional (store *store*))
-  (sb-concurrency:enqueue thing (delete-queue store)))
+  ;; (sb-concurrency:enqueue thing (delete-queue store)))
+  (concurrent-enqueue thing (delete-queue store)))
 
 (defun intern-spog (s p o g)
   (values 
@@ -119,7 +128,8 @@
    (if (stringp o) (intern o :graph-words) o)
    (if (stringp g) (intern g :graph-words) g)))
 
-(defun lock-pattern (subject predicate object graph &key (kind :write) (store *store*))
+(defun lock-pattern (subject predicate object graph &key (kind :write) 
+		     (store *store*))
   (multiple-value-bind (subject predicate object graph) 
       (intern-spog subject predicate object graph)
     (let ((lock nil) (pattern (list subject predicate object graph)))
@@ -148,6 +158,7 @@
   (multiple-value-bind (subject predicate object graph) 
       (intern-spog subject predicate object graph)
     (let ((pattern (list subject predicate object graph)))
+      ;; LispWorks hcl:with-hash-table-locked hash-table &body body => results
       (sb-ext:with-locked-hash-table ((locks store))
 	(let ((lock (gethash pattern (locks store))))
 	  (when (rw-lock? lock)
