@@ -18,11 +18,14 @@
 
 (defpackage #:vivace-graph-v2
   (:nicknames :vg)
+  (:shadow :cursor :cursor-next :cursor-prev :cursor-close)
+  (:shadowing-import-from :elephant :get-value)
   (:use #:common-lisp
         #:cffi
 	#:bordeaux-threads 
-	#:cl-skip-list
-	#:local-time)
+        #:cl-skip-list
+        #:elephant
+        #:local-time)
   (:import-from #:vg-get-time-of-day #:gettimeofday)
   (:export #:*store*
 	   #:create-triple-store
@@ -183,8 +186,4 @@
 
 	   #:flatten
 	   ))
-
-
-
-
 
