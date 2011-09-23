@@ -74,6 +74,19 @@ result is otherwise meaningless."
 ;; explicit specification of equivalence relations 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+;; previously defined in cl-btree-impl
+;; (defgeneric key= (a b)
+;;   (:method ((a integer) (b integer))
+;;     (= a b))
+;;   (:method ((a string) (b string))
+;;     (string= a b))
+;;   (:method ((a string) (b symbol))
+;;     (string= a (symbol-name b)))
+;;   (:method ((a symbol) (b symbol))
+;;     (string= (symbol-name a) (symbol-name b)))
+;;   (:method ((a symbol) (b string))
+;;     (string= (symbol-name a) b)))
+  
 (defmethod b-tree-impl::key= ((x puri:uri) (y puri:uri))
   (puri:uri= x y))
 
@@ -101,6 +114,8 @@ result is otherwise meaningless."
 (defmethod b-tree-impl::key= (x (y uuid:uuid))
   (b-tree-impl::key= x (princ-to-string y)))
 
+(defmethod b-tree-impl::key= ((x symbol) (y symbol))
+  (eq x y))
 
 (defmethod b-tree-impl::key= ((x standard-object) (y standard-object))
   "shallow comparison of standard-objects based on their class and slot-values"
@@ -124,6 +139,21 @@ result is otherwise meaningless."
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; explicit specification of ordering relations
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+;; previously defined in cl-btree-impl 
+;; (defgeneric key< (a b)
+;;   (:method ((a integer) (b integer))
+;;     (< a b))
+;;   (:method ((a string) (b string))
+;;     (string< a b))
+;;   (:method ((a string) (b symbol))
+;;     (string< a (symbol-name b)))
+;;   (:method ((a symbol) (b symbol))
+;;     (string< (symbol-name a) (symbol-name b)))
+;;   (:method ((a symbol) (b string))
+;;     (string< (symbol-name a) b)))
+  
+
 
 (defmethod b-tree-impl::key< ((x puri:uri) y)
   (b-tree-impl::key< (princ-to-string x) y))
@@ -167,6 +197,18 @@ result is otherwise meaningless."
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Serializer/Deserializer Interface
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defun flexi-serialize   (payload destination)
+  (hu.dwim.serializer:serialize payload :output destination))
+
+(defun flexi-deserialize (source)
+  (hu.dwim.serializer:deserialize source))
+
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Flexi B-tree Constructor
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -178,10 +220,10 @@ result is otherwise meaningless."
                                     :min-keys       (1- minimum-degree)
                                     :max-keys       (1- (* 2 minimum-degree))
                                     :max-children   (* 2 minimum-degree)
-                                    :key-reader     #'hu.dwim.serializer:deserialize
-                                    :key-writer     #'hu.dwim.serializer:serialize
-                                    :value-reader   #'hu.dwim.serializer:deserialize
-                                    :value-writer   #'hu.dwim.serializer:serialize
+                                    :key-reader     #'flexi-deserialize
+                                    :key-writer     #'flexi-serialize
+                                    :value-reader   #'flexi-deserialize
+                                    :value-writer   #'flexi-serialize
                                     :swap-file      (swap-file:create filespec
                                                       :if-exists if-exists
                                                       :block-size block-size))))
@@ -189,10 +231,10 @@ result is otherwise meaningless."
 (defun b-tree-impl::flexi-b-tree-open (filespec &key (if-exists :overwrite)
                                         (if-does-not-exist :error))
   (b-tree-impl::read-header (b-tree-impl::make-b-tree
-                              :key-reader     #'hu.dwim.serializer:deserialize
-                              :key-writer     #'hu.dwim.serializer:serialize
-                              :value-reader   #'hu.dwim.serializer:deserialize
-                              :value-writer   #'hu.dwim.serializer:serialize
+                              :key-reader     #'flexi-deserialize
+                              :key-writer     #'flexi-serialize
+                              :value-reader   #'flexi-deserialize
+                              :value-writer   #'flexi-serialize
                               :swap-file      (swap-file:open filespec
                                                 :if-exists if-exists
                                                 :if-does-not-exist if-does-not-exist))))
