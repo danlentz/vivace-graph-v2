@@ -309,8 +309,9 @@
     (loop for num from 1
           for obj in (list test1 test2 test3 test4) do
       (setf (gethash num hash) obj))
+    
  (:printv   
-    (setf (snapshot-root set) hash)
+    (setf (snapshot-set-root set) hash)
     (add-to-root 'snap-test-set set)
     (snapshot-commit set)
     
@@ -322,7 +323,7 @@
     #+sbcl (cl-user::gc)
     ;; Reload
     (setf set (get-from-root 'snap-test-set))
-    (setf hash (snapshot-root set))
+    (setf hash (snapshot-set-root (get-from-root 'snap-test-set)))
     (let ((t1 (gethash 1 hash))
 	  (t2 (gethash 2 hash))
 	  (t3 (gethash 3 hash))
