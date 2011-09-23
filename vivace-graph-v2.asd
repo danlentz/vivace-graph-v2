@@ -15,8 +15,9 @@
                 #+sbcl :sb-concurrency
                 #+sbcl :sb-posix
                 :babel  
-                :cl-btree-0.5
-                :hu.dwim.serializer
+             ;; :cl-btree-0.5
+                ;; :hu.dwim.serializer
+                :elephant
                 :hu.dwim.def
                 :cffi
                 :bordeaux-threads
@@ -46,8 +47,8 @@
                 (:file "certainty-factors"  :depends-on ("constants"))
                 (:file "serialize"          :depends-on ("data-types"))
                 (:file "deserialize"        :depends-on ("serialize"))
-                (:file "btree"              :depends-on ("deserialize")) 
-                (:file "table"              :depends-on ("btree")) 
+             ;; (:file "btree"              :depends-on ("deserialize")) 
+             ;; (:file "table"              :depends-on ("btree")) 
                 (:file "index"              :depends-on ("deserialize"))
                 (:file "transaction"        :depends-on ("index"))
                 (:file "full-text-index"    :depends-on ("transaction"))
