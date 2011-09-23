@@ -74,6 +74,9 @@ result is otherwise meaningless."
 ;; explicit specification of equivalence relations 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+(defmethod b-tree-impl::key= ((x puri:uri) (y puri:uri))
+  (puri:uri= x y))
+
 (defmethod b-tree-impl::key= ((x puri:uri) y)
   (b-tree-impl::key= (puri::uri-string x) y))
 
@@ -92,18 +95,29 @@ result is otherwise meaningless."
 (defmethod b-tree-impl::key= ((x uuid:uuid) (y uuid:uuid))
   (uuid:uuid= x y))
 
+(defmethod b-tree-impl::key= ((x uuid:uuid) y)
+  (b-tree-impl::key= (princ-to-string x) y))
+
+(defmethod b-tree-impl::key= (x (y uuid:uuid))
+  (b-tree-impl::key= x (princ-to-string y)))
+
+
 (defmethod b-tree-impl::key= ((x standard-object) (y standard-object))
   "shallow comparison of standard-objects based on their class and slot-values"
+
   (let ((x-class (class-of x))
          (y-class (class-of y)))
-    (and (eq x-class y-class)
-      (notany #'null (mapcar #'(lambda (slot-name)
-                                 (let ((x-boundp (slot-boundp x slot-name))
-                                        (y-boundp (slot-boundp y slot-name)))
-                                   (or (and (not x-boundp) (not y-boundp))
-                                     (and x-boundp y-boundp
-                                       (equalp (slot-value x slot-name) (slot-value y slot-name))))))
-                       (mapcar #'sb-mop:slot-definition-name (sb-mop:class-slots x-class)))))))
+
+      (and (eq x-class y-class)
+      (notany #'null
+        (mapcar #'(lambda (slot-name)
+                    (let ((x-boundp (slot-boundp x slot-name))
+                           (y-boundp (slot-boundp y slot-name)))
+                      (or (and (not x-boundp) (not y-boundp))
+                        (and x-boundp y-boundp
+                          (equalp (slot-value x slot-name) (slot-value y slot-name))))))
+          (mapcar #'sb-mop:slot-definition-name (sb-mop:class-slots x-class)))))))
+  
 
 
 
